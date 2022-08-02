@@ -1,0 +1,130 @@
+plugins {
+    id "java"
+    id "maven-publish"
+    id "com.google.protobuf" version "0.8.14"
+}
+
+group = 'grips'
+version = '0.0.87'
+
+description = """"""
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+     maven { url "https://gitlab.com/api/v4/projects/14813135/packages/maven" }
+     maven { url "https://repo.maven.apache.org/maven2" }
+}
+dependencies {
+    compile group: 'com.google.protobuf', name: 'protobuf-java', version:'3.11.4'
+    compile 'org.apache.logging.log4j:log4j-api:2.17.2'
+    compile 'org.apache.logging.log4j:log4j-core:2.17.2'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.10.3'
+    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.10.3'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.3'
+
+    // https://mvnrepository.com/artifact/commons-logging/commons-logging
+    compile group: 'commons-logging', name: 'commons-logging', version: '1.1.1'
+    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version:'5.5.2'
+    testCompile group: 'org.assertj', name: 'assertj-core', version:'3.15.0'
+
+    compileOnly group: 'org.projectlombok', name: 'lombok', version:'1.18.12'
+    annotationProcessor 'org.projectlombok:lombok:1.18.12'
+    testCompileOnly 'org.projectlombok:lombok:1.18.12'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
+    // https://mvnrepository.com/artifact/org.assertj/assertj-core
+    testCompile group: 'org.assertj', name: 'assertj-core', version: '3.15.0'
+
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) { from project.components.java }
+    }
+    repositories {
+        maven {
+            url "https://gitlab.com/api/v4/projects/14813135/packages/maven"
+            credentials(HttpHeaderCredentials) {
+                if (project.hasProperty('jobToken')) {
+                    name = "Job-Token"
+                    value = project.property('jobToken')
+                } else {
+                    name = "Private-Token"
+                    value = "REPLACE_WITH_YOUR_PERSONAL_ACCESS_TOKEN"
+                }
+            }
+            authentication {
+                header(HttpHeaderAuthentication)
+            }
+        }
+    }
+}
+
+protobuf {
+    // Configure the protoc executable
+    generatedFilesBaseDir = "$projectDir/src/generated"
+    protoc {
+        // Download from repositories
+        artifact = 'com.google.protobuf:protoc:3.11.4'
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java {
+                }
+                cpp {
+                }
+            }
+        }
+    }
+}
+
+configurations {
+    generatedCompile.extendsFrom compile
+}
+
+sourceSets {
+    generated {
+        java {
+            srcDir 'src/generated/main/java'
+            dependencies {
+                compile group: 'com.google.protobuf', name: 'protobuf-java', version:'3.11.4'
+            }
+        }
+    }
+    main {
+        compileClasspath += generated.compileClasspath + generated.output
+        proto {
+            // In addition to the default 'src/main/proto'
+            srcDir 'rcll-refbox/src/msgs/'
+            srcDir 'rcll-refbox/src/libs/logging/llsf_log_msgs'
+        }
+        java {
+        }
+    }
+    test {
+        proto {
+        }
+    }
+}
+
+tasks.build.doFirst {delete2014Folder}
+task delete2014Folder(type:Exec) {
+    println "Deleting: " + new File(".").absolutePath + "/rcll-refbox/src/msgs/2014"
+    delete (new File(".").absolutePath + "/rcll-refbox/src/msgs/2014/")
+    println "Finished delete2014Folder"
+}
+
+
+tasks.clean.doFirst {deleteGeneratedSourceSet}
+task deleteGeneratedSourceSet {
+    println "Deleting: " + new File(".").absolutePath + "/src/generated/"
+    delete new File(".").absolutePath + "/src/generated/"
+    println "Finished deleteGeneratedSourceSet"
+}
+
+test {
+    useJUnitPlatform()
+}

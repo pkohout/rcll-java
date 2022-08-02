@@ -1,0 +1,7 @@
+protobuf.iml
+target
+build
+.gradle
+.idea
+*.pdf
+src/generated
