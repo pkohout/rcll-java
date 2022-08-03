@@ -107,14 +107,6 @@ sourceSets {
     }
 }
 
-tasks.build.doFirst {delete2014Folder}
-task delete2014Folder(type:Exec) {
-    println "Deleting: " + new File(".").absolutePath + "/rcll-refbox/src/msgs/2014"
-    delete (new File(".").absolutePath + "/rcll-refbox/src/msgs/2014/")
-    println "Finished delete2014Folder"
-}
-
-
 tasks.clean.doFirst {deleteGeneratedSourceSet}
 task deleteGeneratedSourceSet {
     println "Deleting: " + new File(".").absolutePath + "/src/generated/"
