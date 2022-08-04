@@ -39,9 +39,6 @@ dependencies {
 }
 
 publishing {
-    publications {
-        mavenJava(MavenPublication) { from project.components.java }
-    }
     repositories {
         maven {
             name = "GitHubPackages"
