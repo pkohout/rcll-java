@@ -110,7 +110,7 @@ sourceSets {
 tasks.clean.doFirst {deleteGeneratedSourceSet}
 task deleteGeneratedSourceSet {
     println "Deleting: " + new File(".").absolutePath + "/src/generated/"
-    delete new File(".").absolutePath + "/src/generated/"
+    //delete new File(".").absolutePath + "/src/generated/"
     println "Finished deleteGeneratedSourceSet"
 }
 
